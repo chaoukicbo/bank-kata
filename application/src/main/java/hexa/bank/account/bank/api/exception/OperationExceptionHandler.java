@@ -1,6 +1,9 @@
 package hexa.bank.account.bank.api.exception;
 
-import hexa.bank.account.bank.commun.exception.*;
+import hexa.bank.account.bank.commun.exception.AccountNotFoundException;
+import hexa.bank.account.bank.commun.exception.AmountException;
+import hexa.bank.account.bank.commun.exception.InsufficientFunds;
+import hexa.bank.account.bank.commun.exception.InvalidArgumentException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,5 +31,11 @@ public class OperationExceptionHandler {
     public ResponseEntity<ExceptionResponse> handleAmountException(AmountException ex) {
         log.error("Amount Exception : {}", ex.getMessage());
         return new ResponseEntity<>(new ExceptionResponse("Amount Exception", ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = {InsufficientFunds.class})
+    public ResponseEntity<ExceptionResponse> handleInsufficientFunds(InsufficientFunds ex) {
+        log.error("Insufficient Funds Exception : {}", ex.getMessage());
+        return new ResponseEntity<>(new ExceptionResponse("Insufficient Funds", ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 }

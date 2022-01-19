@@ -44,4 +44,25 @@ class OperationServiceImplTest {
         assertEquals("client number must be not null", throwable.getMessage());
         verify(accountRepository, never()).findAccountByAccountNumberAndClientNumber(Mockito.anyInt(), Mockito.anyInt());
     }
+
+    @Test
+    void shouldThrowInvalidArgumentExceptionWhenTryToWithdrawalWithNullArguments() throws InvalidArgumentException, AccountNotFoundException {
+        var throwable = catchThrowable(() -> operationServiceImpl.withdrawal(1, 1,null));
+        assertNotNull(throwable);
+        assertEquals(throwable.getClass(), InvalidArgumentException.class);
+        assertEquals("amount must be not null", throwable.getMessage());
+        verify(accountRepository, never()).findAccountByAccountNumberAndClientNumber(Mockito.anyInt(), Mockito.anyInt());
+
+        throwable = catchThrowable(() -> operationServiceImpl.withdrawal(1, null,5D));
+        assertNotNull(throwable);
+        assertEquals(throwable.getClass(), InvalidArgumentException.class);
+        assertEquals("account number must be not null", throwable.getMessage());
+        verify(accountRepository, never()).findAccountByAccountNumberAndClientNumber(Mockito.anyInt(), Mockito.anyInt());
+
+        throwable = catchThrowable(() -> operationServiceImpl.withdrawal(null, 1,50D));
+        assertNotNull(throwable);
+        assertEquals(throwable.getClass(), InvalidArgumentException.class);
+        assertEquals("client number must be not null", throwable.getMessage());
+        verify(accountRepository, never()).findAccountByAccountNumberAndClientNumber(Mockito.anyInt(), Mockito.anyInt());
+    }
 }
