@@ -3,6 +3,7 @@ package hexa.bank.account.bank.service;
 
 import hexa.bank.account.bank.commun.exception.AccountNotFoundException;
 import hexa.bank.account.bank.commun.exception.AmountException;
+import hexa.bank.account.bank.commun.exception.InsufficientFunds;
 import hexa.bank.account.bank.commun.exception.InvalidArgumentException;
 import hexa.bank.account.bank.commun.utils.Validation;
 import hexa.bank.account.bank.model.Account;
@@ -28,6 +29,13 @@ public class OperationServiceImpl implements OperationService {
         account.deposit(amount);
 
         return accountRepository.updateAccountAndSaveStatement(account, Operation.DEPOSIT, amount);
+    }
+
+    public Statement withdrawal(Integer clientNumber, Integer accountNumber, Double amount) throws InvalidArgumentException, AccountNotFoundException, AmountException, InsufficientFunds {
+        var account = retrieveAccount(clientNumber, accountNumber, amount);
+        account.withdrawal(amount);
+
+        return accountRepository.updateAccountAndSaveStatement(account, Operation.WITHDRAWAL, amount);
     }
 
     private Account retrieveAccount(Integer clientNumber, Integer accountNumber, Double amount) throws InvalidArgumentException, AccountNotFoundException {

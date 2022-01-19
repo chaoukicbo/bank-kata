@@ -5,6 +5,7 @@ import hexa.bank.account.bank.api.request.OperationRequest;
 import hexa.bank.account.bank.model.Operation;
 import hexa.bank.account.bank.model.Statement;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +30,23 @@ class OperationControllerIntegrationTest {
     private TestRestTemplate restTemplate;
 
     @Test
+    @Order(1)
     void shouldCallApiDepositAndMakeADeposit() {
         var request = new OperationRequest(444444, 5555555, 100D);
         var path = "http://localhost:" + port + "/api/v1/bank/operation" + "/deposit";
         ResponseEntity<Statement> responseEntity = this.restTemplate.postForEntity(path, request, Statement.class);
 
         assertStatement(responseEntity, request, Operation.DEPOSIT, 100.0, 5764.0);
+    }
+
+    @Test
+    @Order(2)
+    void shouldCallApiWithdrawalAndMakeAWithdrawal() {
+        var request = new OperationRequest(444444, 5555555, 100D);
+        var path = "http://localhost:" + port + "/api/v1/bank/operation" + "/withdrawal";
+        ResponseEntity<Statement> responseEntity = this.restTemplate.postForEntity(path, request, Statement.class);
+
+        assertStatement(responseEntity, request, Operation.WITHDRAWAL, 100.0, 5664.0);
     }
 
     private void assertStatement(ResponseEntity<Statement> responseEntity, OperationRequest request, Operation deposit, double amount, double balance) {

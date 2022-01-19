@@ -2,6 +2,7 @@ package hexa.bank.account.bank.cucumber.step;
 
 import hexa.bank.account.bank.commun.exception.AccountNotFoundException;
 import hexa.bank.account.bank.commun.exception.AmountException;
+import hexa.bank.account.bank.commun.exception.InsufficientFunds;
 import hexa.bank.account.bank.commun.exception.InvalidArgumentException;
 import hexa.bank.account.bank.model.Operation;
 import hexa.bank.account.bank.model.Statement;
@@ -86,11 +87,28 @@ public class DepositOperationSteps {
         assertEquals(message, throwable.getMessage());
     }
 
-    private void makeOperation() throws InvalidArgumentException, AmountException, AccountNotFoundException {
+    @When("I make a withdrawal in my account with an amount of {double}")
+    public void iMakeAWithdrawalInMyAccountWithAnAmountOf(double amount) throws InvalidArgumentException, AmountException, AccountNotFoundException, InsufficientFunds {
+        this.statement = operationService.withdrawal(this.clientNumber, this.accountNumber, amount);
+        Assertions.assertThat(statement).isNotNull();
+        Assertions.assertThat(statement.getOperation()).isEqualTo(Operation.WITHDRAWAL);
+        Assertions.assertThat(statement.getAmount()).isEqualTo(amount);
+        Assertions.assertThat(statement.getAccount()).isNotNull();
+        Assertions.assertThat(statement.getAccount().getNumber()).isEqualTo(this.accountNumber);
+
+        var client = statement.getAccount().getClient();
+        Assertions.assertThat(client).isNotNull();
+        Assertions.assertThat(client.getNumber()).isEqualTo(this.clientNumber);
+    }
+
+    private void makeOperation() throws InvalidArgumentException, AmountException, AccountNotFoundException, InsufficientFunds {
         var client = Objects.isNull(this.wrongClientNumber) ? this.clientNumber : this.wrongClientNumber;
         var account = Objects.isNull(this.wrongAccountNumber) ? this.accountNumber : this.wrongAccountNumber;
         if (this.operationType.equals(Operation.DEPOSIT.toString())) {
             operationService.deposit(client, account, operationAmount);
+        }
+        if (this.operationType.equals(Operation.WITHDRAWAL.toString())) {
+            operationService.withdrawal(client, account, operationAmount);
         }
     }
 }
