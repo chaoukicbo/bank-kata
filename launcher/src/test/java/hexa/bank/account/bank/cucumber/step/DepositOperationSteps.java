@@ -1,11 +1,9 @@
 package hexa.bank.account.bank.cucumber.step;
 
-import hexa.bank.account.bank.commun.exception.AccountNotFoundException;
-import hexa.bank.account.bank.commun.exception.AmountException;
-import hexa.bank.account.bank.commun.exception.InsufficientFunds;
-import hexa.bank.account.bank.commun.exception.InvalidArgumentException;
+import hexa.bank.account.bank.commun.exception.*;
 import hexa.bank.account.bank.model.Operation;
 import hexa.bank.account.bank.model.Statement;
+import hexa.bank.account.bank.port.in.OperationHistoryService;
 import hexa.bank.account.bank.service.OperationServiceImpl;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -14,6 +12,7 @@ import io.cucumber.java.en.When;
 import org.assertj.core.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -23,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class DepositOperationSteps {
     @Autowired
     OperationServiceImpl operationService;
+    @Autowired
+    OperationHistoryService operationHistoryService;
 
     private Integer clientNumber;
     private Integer wrongClientNumber;
@@ -110,5 +111,19 @@ public class DepositOperationSteps {
         if (this.operationType.equals(Operation.WITHDRAWAL.toString())) {
             operationService.withdrawal(client, account, operationAmount);
         }
+    }
+
+    @And("my history of operations will be the following statements$")
+    public void myHistoryWillBe(final List<Statement> statements) throws StatementNotFoundException, InvalidArgumentException {
+        var historyOfStatements = operationHistoryService.history(this.clientNumber, this.accountNumber);
+
+        Assertions.assertThat(statements).hasSize(historyOfStatements.size());
+        Assertions.assertThat(statements).extracting("operation")
+                .containsExactly(historyOfStatements.stream().map(Statement::getOperation).toArray());
+        Assertions.assertThat(statements).extracting("amount")
+                .containsExactly(historyOfStatements.stream().map(Statement::getAmount).toArray());
+        Assertions.assertThat(statements).extracting("balance")
+                .containsExactly(historyOfStatements.stream().map(Statement::getBalance).toArray());
+
     }
 }

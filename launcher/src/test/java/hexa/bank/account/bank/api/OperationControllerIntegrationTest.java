@@ -49,6 +49,22 @@ class OperationControllerIntegrationTest {
         assertStatement(responseEntity, request, Operation.WITHDRAWAL, 100.0, 5664.0);
     }
 
+    @Test
+    @Order(3)
+    void shouldCallApiHistory() {
+        var request = new OperationRequest(444444, 5555555, 100D);
+        var path = "http://localhost:" + port + "/api/v1/bank/operation" + "/history";
+        ResponseEntity<Statement[]> responseEntity = this.restTemplate.postForEntity(path, request, Statement[].class);
+
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isNotNull();
+
+        var statements = responseEntity.getBody();
+        assertThat(statements).hasSize(2);
+        assertThat(statements).extracting("operation").containsExactly(Operation.WITHDRAWAL, Operation.DEPOSIT);
+    }
+
     private void assertStatement(ResponseEntity<Statement> responseEntity, OperationRequest request, Operation deposit, double amount, double balance) {
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
