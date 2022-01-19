@@ -15,3 +15,4 @@ spring:
     password: kata
     driverClassName: org.h2.Driver
     initialization-mode: always
+    data: classpath:/data/import_data.sql
